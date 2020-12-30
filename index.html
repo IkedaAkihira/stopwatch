@@ -4,27 +4,25 @@
         <meta charset="utf-8"/>
         <title>timer</title>
         <script>
-            let timer=NaN,timerState,startButton,count,display,startDate;
+            let timer=NaN,timerState,startButton,display,count,countsPoint;
             onload=()=>{
                 startButton=document.getElementById("start");
                 display=document.getElementById("display");
-                timerState=(parseInt(localStorage.getItem("timerState")))?1:0;
-                startDate=parseInt(localStorage.getItem("startDate"));
-                count=(timerState)?(Date.now()-startDate)/10:count;
-                console.log(count);
-                if(!count)
-                    count=0;
-                let tmp=count/100;
-                display.textContent=`${Math.floor(tmp/3600)}時間${Math.floor((tmp%3600)/60)}分${Math.floor(tmp%60)}秒`;
+                timerState=parseInt(localStorage.getItem("timerState"))||0;
+                count=(parseInt(localStorage.getItem("count"))||0)+timerState*((Date.now()-parseInt(localStorage.getItem("endTime")))||0);
+                let tmp=count/1000;
+                display.textContent=`${Math.floor(tmp/3600)}時間${Math.floor((tmp%3600)/60)}分${tmp%60}秒`;
                 if(timerState){
                     startButton.textContent="stop";
-                    timer=setInterval(tick,10);
+                    countsPoint=Date.now();
+                    console.log("start");
+                    timer=setInterval(tick,100);
                 }
             }
             onunload=()=>{
-                localStorage.setItem("timerState",timerState);
-                localStorage.setItem("startDate",startDate);
-                localStorage.setItem("count",count);
+                localStorage.setItem("timerState",timerState);//タイマーがオンになっているかどうか
+                localStorage.setItem("count",count);//タイマーの時間
+                localStorage.setItem("endTime",Date.now());//ページを閉じたときの時間
             }
             function start(){
                 if(timerState){
@@ -35,23 +33,27 @@
                     startButton.textContent="stop";
                     timerState=1;
                     //let date=new Date();
-                    startDate=Date.now();
-                    timer=setInterval(tick,10);
+                    countsPoint=Date.now();
+                    timer=setInterval(tick,100);
                 }
             }
             function tick(){
-                count++;
-                let tmp=count/100;
-                display.textContent=`${Math.floor(tmp/3600)}時間${Math.floor((tmp%3600)/60)}分${Math.floor(tmp%60)}秒`;
+                count+=(Date.now()-countsPoint);
+                console.log(Date.now()-countsPoint);
+                console.log(count);
+                countsPoint=Date.now();
+                let tmp=count/1000;
+                display.textContent=`${Math.floor(tmp/3600)}時間${Math.floor((tmp%3600)/60)}分${tmp%60}秒`;
             }
             function reset(){
-                count=0;
-                startDate=0;
                 if(timerState){
                     startButton.textContent="start";
                     timerState=0;
                     clearInterval(timer);
                 }
+                count=0;
+                let tmp=count/1000;
+                display.textContent=`${Math.floor(tmp/3600)}時間${Math.floor((tmp%3600)/60)}分${tmp%60}秒`;
             }
         </script>
     </head>
